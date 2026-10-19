@@ -32,6 +32,9 @@ Tips:
 
 - **Players page:** `https://sleeper.com/leagues/{L}/players`, with the Free agents filter on. A **+** next to a player means free agent: click it, pick the drop in the modal (scroll to reach bench rows), then Add Player. A **W** means he's on waivers: the same click opens a bid modal (set the FAAB amount, pick the drop, Make Waiver Bid).
 - **Lineup:** Team tab. Use the week arrow to set a future week. Click a starter's position button, then the bench player to swap in.
+- **Waiver badge between weeks:** after a week ends and before the waiver run, Sleeper can show every unrostered player with a **W** and the day waivers clear, even one whose team was on bye. Check the badge before planning a free-agent add. If it's there, the add is a claim, so put it in before the run.
 - **Trades:** Trades tab. Pick the partner, select players on both sides, propose. Confirm it shows as pending.
 - **Search box:** click it by coordinates. Clicking by element reference can leave focus in League Chat, so never type or press Enter there except to post an approved message.
 - Sleeper puts new adds on the bench. Re-fill the slot afterward.
+- Waiver claims land on the bench too. On the first run after waivers process, move each winning claim into the slot it was meant for.
+- **IR lock:** when a player on IR stops being IR-eligible (his tag improves from Out), Sleeper blocks lineup changes until he's moved off IR. Move him off first, which can take a drop if the roster is full, then set the lineup.

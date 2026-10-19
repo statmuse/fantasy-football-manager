@@ -27,7 +27,7 @@ Then say "set up my fantasy leagues." The agent asks which platform each league 
 
 - **Weekly run:** byes, injuries, waivers and FAAB, kicker and defense streams, start/sit ties, trade research.
 - **Daily checks** (three a day): news, injuries and role changes, then lineup fixes and free agents that matter.
-- **Game-day lock check:** right after inactives, so no starter who's out is left in your lineup.
+- **Game-day lock check:** right after inactives, so no starter who's out is left in your lineup, and a bench player whose role just grew gets the start.
 - **Game-day recap:** grades every call and, if you want, drafts one league chat post for you to approve.
 - **Weekly report:** every move and the stat behind it, including every call that went against your platform's projection and what it cost or gained.
 
