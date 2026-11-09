@@ -1,59 +1,59 @@
 ---
 name: statmuse-fantasy-football-manager
-description: Fantasy football manager powered by the StatMuse Agent (sports stats and information from StatMuse AI). Sets and optimizes lineups, checks injuries, byes and inactives, works the waiver wire and FAAB, streams kickers and defenses, researches and drafts trades, runs daily and game-day checks, drafts league chat trash talk, and keeps a weekly report of every move and the stat behind it. Works with your fantasy platform of choice (ESPN, Yahoo, Sleeper and others). Use for "manage my fantasy team," "set my lineup," "who should I start," "waiver wire," "FAAB bid," "stream a defense," "fantasy trade," "daily fantasy check," "game-day check," "weekly fantasy report," or "set up my leagues."
+description: Fantasy football manager powered by the StatMuse Agent (sports stats and information from StatMuse Intelligence). Sets and optimizes lineups, checks injuries, byes and inactives, works the waiver wire and FAAB, streams kickers and defenses, researches and drafts trades, runs daily and game-day checks, drafts league chat trash talk, and keeps a weekly report of every move and the stat behind it. Works with your fantasy platform of choice, in any agent that supports MCP. Use for "manage my fantasy team," "set my lineup," "who should I start," "waiver wire," "FAAB bid," "stream a defense," "fantasy trade," "daily fantasy check," "game-day check," "weekly fantasy report," or "set up my leagues."
 ---
 
 # StatMuse Fantasy Football Manager
 
-Runs one or more fantasy football teams with sports stats and information from StatMuse AI. Claude does the research, makes the calls on the owner's roster, and writes down the stat behind every call. The owner only approves things that reach other people: trades and league chat posts.
+Runs one or more fantasy football teams with sports stats and information from StatMuse Intelligence. The agent does the research, makes every start, sit, waiver and trade call, and writes down the stat behind each one. By default it hands the owner a short list of moves to make in their fantasy app. If the owner turns moves on, the agent makes the pre-approved ones itself. Trades and league chat posts always wait for the owner's yes.
 
-It works with whatever fantasy platform the owner plays on. Platform guides live in `references/`. Read the one for the owner's platform before touching their league.
+It works with whatever fantasy platform the owner plays on, in any agent that supports MCP. `references/platform-guide.md` covers getting the owner's league info and, with moves on, working the league on any platform. Read it before the first run. This skill is a starting point: tweak it for your league, platform and agent as you go.
 
 ## Read first
 
-**The StatMuse Agent is in beta.** The StatMuse MCP and API are available to StatMuse+ members, and new tools ship often. Start a fresh session for each weekly run so the newest tools load. At the start of every run, look at the StatMuse tool list for anything new (a projections tool, for example) and prefer it over any workaround in this file. If a tool StatMuse announced doesn't show up, refresh the connector's tool list (in Claude: Settings > Connectors, open the StatMuse connector, then the ⋯ menu > Refresh tools list) and start a new session.
+**The StatMuse Agent is in beta.** The StatMuse MCP and API are available to StatMuse+ members, and new tools ship often. Start a fresh session for each weekly run so the newest tools load. At the start of every run, look at the StatMuse tool list for anything new and prefer it over any workaround in this file. If a tool StatMuse announced doesn't show up, refresh or reconnect the StatMuse connector in your agent's settings and start a new session.
 
 **Where everything comes from:**
 
-- **Sports stats and information:** StatMuse AI, through the StatMuse MCP. Don't browse or scrape statmuse.com. The MCP is how agents get the StatMuse experience.
-- **League state and moves:** the owner's fantasy platform, through its public API where one exists, or the website in the browser.
-- **Browser automation** is only for the fantasy platform: reading league pages and making lineup, waiver and trade moves while the owner is logged in.
+- **Sports stats and information:** StatMuse Intelligence, through the StatMuse MCP. Don't browse or scrape statmuse.com. The MCP is how agents get the StatMuse experience.
+- **League info:** from the owner by default: a screenshot or paste of the roster, this week's matchup, the scoring settings and any free agents they're eyeing. If the owner sets it up, the agent can read it from their fantasy site instead (`references/platform-guide.md`).
+- **Moves:** off by default, so the owner makes them in their fantasy app. The owner can turn them on (`moves: on` in the config) if their agent has a browser tool and their platform's terms allow automated tools. Then the agent makes only the pre-approved moves, and only on the fantasy site.
 
 **What you need:**
 
 | Capability | Required? | Without it |
 |---|---|---|
 | StatMuse MCP connected | Required | Stop and ask the owner to connect it |
-| Browser tool logged in to the fantasy site (Claude in Chrome) | For making moves | **Advisor mode:** do all the research and hand the owner a short list of moves to make |
+| A browser tool on the owner's fantasy site | Only with moves on | The default: the owner shares league info and makes the moves |
 | Scheduled tasks | Optional | Run checks when the owner asks |
-| Artifacts (claude.ai) | Optional | Write the weekly report as a Markdown file |
+| A way to publish a page | Optional | Write the weekly report as a Markdown file |
 
 ## Modes
 
 - **First-run setup:** find the owner's leagues and write the config.
 - **Weekly run** (manual, usually Tuesday to Thursday): full checklist, waivers, trade research, new week section in the report.
-- **Daily check** (scheduled, 3 times a day): news, injuries and role changes, then fix lineups and grab free agents that matter.
+- **Daily check** (scheduled, 3 times a day): news, injuries and role changes, then the lineup fixes and free agents that matter.
 - **Game-day lock check** (scheduled, right after inactives): no starter who's Out or inactive is left in a lineup when his game locks, and a bench player whose role just grew (a teammate is inactive) gets the start if he now projects higher.
 - **Game-day recap + trash talk** (scheduled, opt-in): score the day, grade our calls, draft one league chat post.
 
 ## Config
 
-Keep one config per owner. Store it wherever this environment persists things: a `config.md` next to this file if the skill folder is writable (Claude Code), the skill itself re-saved with the config filled in (Claude apps that support saving skills), or project memory. Start from `config.example.md`.
+Keep one config per owner. Store it wherever your agent keeps things between sessions: a `config.md` next to this file if the skill folder is writable, the skill itself re-saved with the config filled in, or the agent's memory or project files. Start from `config.example.md`.
 
 Scoring, lineup slots, bench and IR counts, waiver type and trade deadline always come from the league's own settings. Never hardcode them. The config's `notes` line is a human summary only.
 
 ## First-run setup
 
-1. Ask which platform each league is on (ESPN, Yahoo, Sleeper, other) and load the matching file in `references/`. For any other platform, use the browser-only approach in `references/other-platforms.md`.
-2. Follow that guide to find the owner's leagues, team and roster. Show the list and ask which leagues to manage (default: all).
-3. Ask what's pre-approved. Default: lineup swaps, IR moves, free-agent adds and drops, and waiver or FAAB claims within a cap are do-now. Trades and league chat posts always need a one-word yes, every time.
+1. Ask which platform each league is on, then follow `references/platform-guide.md`. If an earlier run saved notes on that platform (`references/<platform>.md`), read those first.
+2. Follow the guide to get each league's settings and the owner's team and roster. Ask which leagues to manage (default: all).
+3. Ask whether the owner wants the agent to make moves itself. Default: no, so the agent recommends and the owner makes the moves. If yes (their agent has a browser tool and their platform's terms allow it), set `moves: on` and ask which moves are pre-approved: lineup swaps, IR moves, free-agent adds and drops, waiver or FAAB claims within a cap. Trades and league chat posts always need a one-word yes, every time.
 4. Ask about trash talk: "Want me to draft a league chat post after each game day, roasting the other teams' bad days and bragging about our good calls? You approve each post with one word." If yes, pick a prefix (default `"<OwnerName>Agent: "`).
-5. Set up the weekly report: one per league, as a published artifact if available, otherwise a Markdown file.
-6. Write the config, and create the scheduled tasks at the end of this file if the environment supports them.
+5. Set up the weekly report: one per league, as a page your agent can publish if it can, otherwise a Markdown file.
+6. Write the config, and create the scheduled task at the end of this file if your agent supports scheduled tasks.
 
 ## Step 1: Connect the StatMuse Agent
 
-1. Find the StatMuse tools. In Claude, MCP tools can be deferred and carry a server-ID prefix, so searching "statmuse" may find nothing. Run one tool search by name: `get_stats_guide get_stats search_team search_player get_games get_game_details get_player_injuries get_season_briefing get_standings get_team_roster get_player_detail get_news get_game_plays get_article`, and load every tool with that prefix, plus any new ones. Confirm in one line: "StatMuse Agent connected: <n> tools."
+1. Find the StatMuse tools. Some agents load MCP tools on demand or add a server prefix to their names, so a search for "statmuse" can miss them. Search by tool name: `get_stats_guide get_stats search_team search_player get_games get_game_details get_player_injuries get_season_briefing get_standings get_team_roster get_player_detail get_projections get_news get_game_plays get_article submit_feedback`, and load every tool with that prefix, plus any new ones. Confirm in one line: "StatMuse Agent connected: <n> tools."
 2. Call `get_stats_guide` (`league: "nfl"`) before the first `get_stats`, then `get_season_briefing` (nfl) to ground the week.
 3. Resolve IDs in batches: `search_player` and `search_team` take arrays. Platform player IDs are not StatMuse IDs, so map by name and check the team matches. Watch suffixes ("Luther Burden" vs "Luther Burden III").
 4. If no StatMuse tools load, stop and tell the owner the StatMuse connector isn't enabled in this session. In a scheduled run, report that and stop. Don't fall back to browsing statmuse.com.
@@ -62,26 +62,28 @@ Scoring, lineup slots, bench and IR counts, waiver type and trade deadline alway
 
 - Always filter `seasonYear` (the calendar year the season starts) and `seasonType: RegularSeason`.
 - **Fantasy points:** `Fantasy-HalfPointsPerReceptionPoints`, `Fantasy-FullPointsPerReceptionPoints` or `Fantasy-StandardPoints`, at player, game or opponent level. Match the league's scoring.
-- **Defense vs position:** group `[{"type":"opponent"},{"type":"position"}]` with the fantasy points key, `Receiving-Yards`, `Rushing-Yards`, `Receiving-Targets`, filtered to the opponents you care about. One call covers what each defense gives up to QB, RB, WR, TE and K.
+- **Defense vs position:** group `[{"type":"opponent"},{"type":"position"}]` with the fantasy points key, `Receiving-Yards`, `Rushing-Yards`, `Receiving-Targets`, filtered to the opponents you care about. One call covers what each defense gives up to QB, RB, WR, TE and K. The `position` filter takes full names (`Quarterback`, `RunningBack`, `WideReceiver`, `TightEnd`, `Kicker`) and rejects abbreviations like `QB`; `get_projections` is the opposite and takes `QB`, `RB`, `WR`, `TE`, `K` and `DST`.
 - **Usage and game logs:** group `[player, game]` with fantasy points, `Receiving-Targets`, `Rushing-Attempts`; filter many player IDs at once; sort chron ascending.
 - **Backfield reality check:** group `player`, filter `team` and `position: RunningBack`, for carries and targets by back. Projections guess at roles; game logs show them. Example: a back projected for 7 points can have zero touches all season.
 - **With or without a teammate:** the `playerPresence` filter (`playerId`, `status: "with"` or `"without"`) splits a player's stats by whether that teammate played in the game. It's game-level, not snaps on the field, so say "in games without him," never "on the field without him."
 - **Defense streaming:** opponent offense via `[team, game]` with `Points`, `Turnovers`, `Passing-Sacks` (sacks allowed). Own defense via `team` with `Defensive-Sacks`, `OpponentTurnovers`, `OpponentPoints`. Team defense fantasy points: `Fantasy-StandardPoints` with a `team` grouping (`opponent` grouping for what each offense gives up to defenses). StatMuse's standard scoring can differ from a platform's defense scoring, so compare once against the platform's actual defense points before leaning on it.
 - **Kicker streaming:** `opponent` plus `position: Kicker` for kicker points and field goal attempts allowed. A defense that gives up touchdowns (many extra points, few field goals) is worse for kickers than its points per game suggests.
-- **Pregame lines:** `get_game_details` on scheduled games returns spread, opening line, moneyline, total, and venue roof and surface. Implied team total = total / 2 − spread / 2. Use it for stacks and for kicker and defense streams. Lines can drop off once a game is in progress.
+- **Pregame lines:** `get_game_details` on scheduled games returns the spread and total, plus venue roof and surface. Implied team total = total / 2 − spread / 2. Use it for stacks and for kicker and defense streams. Lines can drop off once a game is in progress.
 - **Injuries:** `get_player_injuries` for the NFL needs `team_ids`. Pass every team in the union of managed rosters and opponents in one call (max 40). Read `game_status` and `practice_status`. If it doesn't show game-day inactives yet (Friday's tags still up on game day), confirm inactives with the team's list in the lock check (Step 5).
 - **News:** `get_player_detail` (up to 10 IDs) returns recent news per player. It's the fastest way to catch "X will replace Y" and role changes.
 - **Per-game opponent rates:** pull totals and divide by game count. Get the count from a `[team, game]` query, since some count columns can be dropped from a result.
-- **Projections:** if a StatMuse projections tool is listed, use it as the second projection next to the platform's (see Projection rule), labeled "StatMuse." If the tool names an underlying provider, add it in parentheses: "StatMuse (provider name)." Check injuries before using it: a projections tool can keep projecting players who are out, on IR or not on an active roster, and can project two starting QBs for one team, so count anyone who won't play as 0, in rankings too. For rest of season, add up the weekly projections instead of trusting a season total. And score its projected stats with the league's own scoring settings rather than taking its points as they come: fixed formats rarely match a real league, since interception penalties, kicker distance tiers and defense points-allowed tiers all vary. If it doesn't project a defense's points allowed, use the opponent's Vegas implied team total.
+- **Projections (`get_projections`, NFL):** use it as the second projection next to the platform's (see Projection rule), labeled "StatMuse." If the tool names an underlying provider, add it in parentheses: "StatMuse (provider name)." Pick a `window`: `this_week`, `week` with `week_number` (past weeks work too, so use them to grade the week), or `season`. Pass up to 25 `player_ids` and `team_ids` combined (`team_ids` return that team's defense). With no IDs it's a leaderboard (`positions`, `limit` up to 100), which is how to rank free agents and streamers. Read each row's `status` (`ok`, `not_found`, `no_projection`). Check injuries before using it: it can keep projecting players who are out, on IR or not on an active roster, and can project two starting QBs for one team, so count anyone who won't play as 0, in rankings too. For rest of season, add up the weekly projections, which also settles whether this week is counted. Ask for the scoring format closest to the league's (standard, half-PPR or PPR) on every call instead of relying on the default, and check the format the response reports. Then check the league's scoring settings against the tool's format: fixed formats rarely match a real league, since interception penalties, kicker distance tiers and defense points-allowed tiers all vary. When they differ, the platform's projection is already in the league's scoring, so prefer it when the two disagree. For the StatMuse number, score its projected stats with the league's own settings rather than taking its points as they come, and if it doesn't project a defense's points allowed, use the opponent's Vegas implied team total.
 
 ## Step 2: Pull league state
 
-Follow the platform guide. Every run needs, for each managed league:
+Get it from the owner, or from their fantasy site if they set that up (`references/platform-guide.md`, plus any notes saved for that platform). Every run needs, for each managed league:
 
 - the current week, league settings (scoring, lineup slots, waivers, trade deadline), all rosters, this week's matchups, recent transactions and pending trades;
 - the platform's projections in the league's scoring;
 - free agents and players on waivers, with projections;
 - the NFL schedule and byes (StatMuse `get_games` works on any platform; kickoff times are ET, so convert to the owner's timezone).
+
+No free agent list? Rank candidates with `get_projections` leaderboards and StatMuse usage stats, then ask the owner which ones are available in their league.
 
 **Several leagues at once:** build one deduped player universe (every managed roster, each league's top free agents, each opponent's starters). Run the StatMuse injury, news and usage queries once on that universe, then decide league by league. The same player can be a start in one league and a sit in another.
 
@@ -111,27 +113,27 @@ Waivers fix this week. Trades win the league. Research every weekly run, but onl
 5. **Structure it:** main offer plus fallback. Sell high after a touchdown-driven spike with flat usage, buy low after a quiet game with steady usage. Don't trade with this week's opponent until the matchup ends. Respect the trade deadline.
 6. **Judge it:** likely, coin flip or long shot, with one line why. Don't propose long shots.
 7. **Write it up** for the owner: Proposal (we send X, we get Y), Why for us (with the StatMuse stat), Why they'd say yes, Can it get done, Fallback. Then one question: "Send it?"
-8. **After a yes, send it** in the platform and confirm it's pending. Make no other trades in that league until it resolves.
+8. **After a yes,** the owner sends it in their fantasy app (or the agent does, with moves on) and confirms it's pending. Make no other trades in that league until it resolves.
 9. **Track it every run.** Accepted: reset the lineup and log it. Declined or expired: the fallback is a new proposal and needs a new yes. Countered or incoming: evaluate the same way and recommend take it or not.
    - **Fleece guard:** assume every incoming offer is trying to win the trade. Recommend declining anything that lowers our projected starting lineup for the rest of the season, trades a starter for bench depth, is built on a touchdown spike or a name returning from injury, or makes a top-3 rival clearly better. When in doubt, decline.
 10. **Approval rule:** each send, accept, counter or decline needs its own yes in chat. Scheduled runs never send or accept trades. They queue the proposal for the next time the owner is in chat.
 
 ## Projection rule (always)
 
-The platform's projection is the default. Any lineup or add/drop call that goes against it is logged in that week's **Calls against the projection** table:
+The platform's projection is the default, since it's already in the league's own scoring. Any lineup or add/drop call that goes against it is logged in that week's **Calls against the projection** table:
 
 - It counts as against when we start a lower-projected player over a higher-projected eligible one, or pick a lower-projected free agent for a starting slot.
 - Each row: when, the call, the projected cost in points, and the StatMuse stat that justified it. Sum the week's cost under the table.
 - Keep it rare. Override only when the StatMuse stats clearly point the other way: a usage reality check or a role change the projection hasn't caught. What an opponent has allowed over a few games is noisy (one dud game swings it), so use it to break a true tie, not to overrule the projection, and never to overrule two projections that agree. Log near-ties too.
 - When the projected margin moves, say why in one line (a projection refresh or our own move).
-- If a StatMuse projections tool is available, show its number beside the platform's for every starter, labeled by source, flag slots where they disagree on who to start, and grade both after the week (Step 5b). The platform's projection stays the default.
+- Show the `get_projections` number beside the platform's for every starter, labeled by source, flag slots where they disagree on who to start, and grade both after the week (Step 5b). The platform's projection stays the default.
 
 ## Step 4: Daily check (3 times a day, for example 7 AM, noon and 6 PM local)
 
 1. **Statuses:** one `get_player_injuries` call for the whole player universe's teams. Flag status changes since the last log and any DNP practice.
 2. **News:** `get_player_detail` on every rostered player, in batches of 10. Look for ruled out, role change, "X will replace Y", trade, release, suspension, benching or QB change. A rostered player whose projection drops to 0 in a week his team plays was probably released or traded, so check his news right away. Scan `get_season_briefing` headlines too.
 3. **Promoted backups:** for any NFL starter ruled Out, check whether his backup is available and worth a spot. Confirm with StatMuse usage stats.
-4. **Act per league, within what's pre-approved:**
+4. **Act per league.** With moves off, put these on the owner's list of moves to make. With moves on, make the pre-approved ones:
    - Starter Out or suspended: swap in the best eligible bench player whose game hasn't locked. Move him to IR if allowed.
    - Starter Doubtful: bench him if there's a reasonable replacement.
    - Clearly better free agent for a hole (bye, injury, kicker or defense stream): add and drop now. Never drop a player who's in a future week's plan without noting it.
@@ -145,7 +147,7 @@ The platform's projection is the default. Any lineup or add/drop call that goes 
 
 1. Get today's games and kickoff times from StatMuse `get_games`.
 2. If no rostered player (starter or bench) in any league kicks off in the next 3 hours, end with "No locks in window."
-3. For each starter kicking off in the window, check the platform's injury tag, StatMuse `game_status` and the latest news. Out or inactive: swap in the best bench player whose game hasn't started, or add the best free agent whose game hasn't locked.
+3. For each starter kicking off in the window, check the platform's injury tag, StatMuse `game_status` and the latest news. Out or inactive: swap in the best bench player whose game hasn't started, or add the best free agent whose game hasn't locked. With moves off, tell the owner right away, since the clock is running.
    - **Confirm with the team's inactive list.** If StatMuse's injury report doesn't show game-day inactives yet, it can't settle active or inactive on its own. For anyone who had a Friday tag (Questionable, Doubtful or Out), or whose platform tag and StatMuse status disagree, search the web (if your agent can) for that team's inactives for the game, and use a report published after the list came out: the team's site or a beat reporter. Many platforms clear the Questionable tag once a player is active, which is a second confirmation. If the sources still conflict or the list isn't out, make no move for that player and flag it. Note any snap-limit report for an active starter in the summary.
 4. **Re-check start/sit after inactives.** Re-pull the platform's projections for every rostered player whose game hasn't locked. When a teammate's absence opens a role (a WR1 or a lead back inactive), a bench player can now outproject a starter: start the higher-projected eligible player. If the projection hasn't caught up, check StatMuse stats from games without that teammate (`playerPresence`, `status: "without"`). If they clearly favor the bench player, make the swap and log it as a call against the projection. Both players' games must still be unlocked.
 5. Leave active Questionable players in.
@@ -155,32 +157,33 @@ The platform's projection is the default. Any lineup or add/drop call that goes 
 
 1. **Score the day:** every team's starters vs projection, points left on benches, inactive starters. Use StatMuse box scores (`get_game_details`) for the colorful details. Only count players whose NFL game is final (`get_games` status `completed`). A zero from a player who hasn't played yet is not a bust.
 2. **Grade our calls:** every call against the projection, waiver add, stream and trade, by how much it beat or missed. After the last game of the week, fill in the week's projection grade (each source's average miss on our starters, plus season to date).
-   - **Lineup efficiency, every team:** after the last game of the week, compute each team's points scored divided by the best lineup it could have started from its own roster that week. Fill the single-position slots first (QB, K, DEF, TE, then RBs and WRs), then FLEX from the best remaining eligible player, using each player's eligible positions. Add the week to a "Lineup efficiency" table (each team's weekly %, season %, points left on the bench) and say where our team ranked against the human managers. Label any weeks before the agent took over.
+   - **Lineup efficiency, every team:** after the last game of the week, compute each team's points scored divided by the best lineup it could have started from its own roster that week. Fill the single-position slots first (QB, K, DEF, TE, then RBs and WRs), then FLEX from the best remaining eligible player, using each player's eligible positions. Add the week to a "Lineup efficiency" table (each team's weekly %, season %, points left on the bench) and note where our team ranked in the league. Label any weeks before the agent took over.
 3. **Draft one post** if trash talk is on, under about 400 characters, starting with the prefix:
    - Roast 1 to 3 of the other teams' worst calls of the day. Never our own team.
-   - Brag about 1 to 2 of our calls that beat the humans, with the number.
+   - Brag about 1 to 2 of our calls that paid off, with the number.
    - Only players whose game is final. Re-check every name right before showing the draft.
    - Don't call a matchup won until it's final or mathematically clinched, and don't claim a league record until it can't be beaten.
    - Football only: lineup calls and stat lines. Nothing personal, nothing mean. Funny beats harsh. If our day was bad, go self-deprecating or skip it.
    - At most 1 post per game day. Don't reply to other people's messages.
-4. **Get a one-word OK, then post.** In a scheduled run, put the draft in the summary and stop.
+4. **Get a one-word OK, then post** (with moves off, hand the owner the text to paste). In a scheduled run, put the draft in the summary and stop.
 
-## Execution rules
+## Approvals and moves
 
-- Make moves only on the fantasy platform, while the owner is logged in, and only moves the owner pre-approved. The platform guide has the click paths.
-- Double-check the league in the URL before every move. Multi-league runs make it easy to act in the wrong league.
-- After adding a player to fill a kicker or defense slot, put him in the starting slot. Most platforms put adds on the bench.
-- Never type in a league chat box except to post an approved message.
-- Verify the final lineup after every move, through the platform's API or by re-reading the lineup page.
 - **Approval queue:** anything that reaches other people (trade sends, accepts, counters, declines, chat posts) goes into one bundled message with a recommendation per item. The owner's one reply ("yes to all," "yes to 1, skip 2") approves exactly what's listed.
+- **Moves off (the default):** end each run with a short list of moves for the owner to make in their app, each with the stat behind it.
+- **Moves on:** make only the moves the owner pre-approved, only on their fantasy site, while they're signed in. `references/platform-guide.md` covers making and checking a move.
+  - Double-check the league in the URL before every move. Multi-league runs make it easy to act in the wrong league.
+  - After adding a player to fill a kicker or defense slot, put him in the starting slot. Most platforms put adds on the bench.
+  - Never type in a league chat box except to post an approved message.
+  - Verify the final lineup after every move by re-reading the lineup page.
 
 ## Feedback
 
-- The StatMuse MCP's feedback tool is in alpha, so it isn't on every account yet. Check whether the StatMuse tools list it.
-- If they do, report problems through it when you hit them, as its description says: a StatMuse tool that failed or was unclear, a missing capability, or a step in a platform guide here that no longer works (name `statmuse-fantasy-football-manager` as the tool for skill problems).
+- The StatMuse MCP has a feedback tool, `submit_feedback`.
+- Report problems through it when you hit them, as its description says, and mention it in the run summary: a StatMuse tool that failed or was unclear, a missing capability, or a step in `references/platform-guide.md` that no longer works (name `statmuse-fantasy-football-manager` as the tool for skill problems).
 - When the owner says "send feedback to StatMuse," pass their words along through that tool as feedback from the user.
 - Never include league members' names, team names or league IDs in feedback.
-- No feedback tool listed: point the owner to the questions contact on their account page at developer.statmuse.com.
+- If the tool isn't available in your agent, point the owner to the questions contact on their account page at developer.statmuse.com.
 
 ## Step 6: Weekly report
 
@@ -191,17 +194,17 @@ One report per league, updated in place, newest week on top. Never delete earlie
 - a StatMuse recheck table with a "vs projection" column;
 - the Calls against the projection table with its total;
 - the projection comparison and last week's projection grade (when a second projection exists);
-- the lineup efficiency table (every team, every week, with our rank against the human managers);
+- the lineup efficiency table (every team, every week, with where we ranked in the league);
 - matchup intel cards, the final lineup, a daily log, open items;
 - a trade desk (Proposed, Sent, Accepted, Declined);
 - last week's result with a review of the calls.
 
-Label every source: sports stats and information from StatMuse AI, league info from the platform. If a report is shared publicly, anonymize the other managers unless they agree to be named. Plain sentences, dates as `YYYY.MM.DD`.
+Label every source: sports stats and information from StatMuse Intelligence, league info from the platform. If a report is shared publicly, anonymize the other managers unless they agree to be named. Plain sentences, dates as `YYYY.MM.DD`.
 
-## Scheduled tasks (if the environment supports them)
+## Scheduled task (if your agent supports scheduled tasks)
 
-Use the owner's timezone. Scheduled runs only fire while the app is running.
+One task covers every check, so the owner has one thing to manage. Use the owner's timezone.
 
-- **Daily check:** `0 7,12,18 * * *`. "Run the statmuse-fantasy-football-manager skill in Daily check mode for every league in the config."
-- **Game-day lock check:** a few minutes after inactives come out (90 minutes before kickoff) for each window. Pacific examples: `5 5 * * 0` (international morning games), `35 8 * * 0` (early games), `0 12 * * 0` (late afternoon), `55 15 * * 0,1,4` (night games). "Run the statmuse-fantasy-football-manager skill in Game-day lock check mode."
-- **Game-day recap:** `0 21 * * 0,1,4` Pacific. "Run the statmuse-fantasy-football-manager skill in Game-day recap mode. Draft the post, don't send it."
+- **Schedule:** `5 5,7,9,12,16,18,21 * * *` (Pacific example). Shift it for other timezones: daily checks at 7 AM, noon and 6 PM, a lock check right after inactives for each kickoff window (about 90 minutes before kickoff), and the recap at 9 PM.
+- **Prompt:** "Run the statmuse-fantasy-football-manager skill. Work out what's due from the time and today's NFL games (`get_games`): the daily check, a game-day lock check if a rostered player kicks off in the next 3 hours, or the game-day recap after the day's last game. Run everything that's due for every league in the config, and draft any league chat post without sending it. If nothing is due, reply 'Nothing due' and stop."
+- Some agents only run scheduled tasks while the app is open. A missed run happens at the next launch.
